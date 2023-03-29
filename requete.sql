@@ -38,25 +38,23 @@ WHERE a1.ville = 'Paris' AND v2.date_heure_depart > v1.date_heure_arrivee AND v3
 
 -- Question D
 -- Veuillez fournir la liste des villes accessibles depuis Paris, en tenant compte des horaires de vol, avec des vols directs ou un nombre quelconque de correspondances.
-
-WITH RECURSIVE accessible_cities (ID_aeroport_depart, ID_aeroport_arrivee, ville, date_heure_depart, date_heure_arrivee) AS (
-    -- Cas de base: vols directs depuis Paris
-    SELECT v.ID_aeroport_depart, v.ID_aeroport_arrivee, a2.ville, v.date_heure_depart, v.date_heure_arrivee
-    FROM Vol v
-    JOIN Aeroport a1 ON v.ID_aeroport_depart = a1.ID_aeroport
-    JOIN Aeroport a2 ON v.ID_aeroport_arrivee = a2.ID_aeroport
-    WHERE a1.ville = 'Paris'
-    
-    UNION ALL
-    
-    -- Cas récursif: correspondances
-    SELECT ac.ID_aeroport_depart, v.ID_aeroport_arrivee, a2.ville, ac.date_heure_depart, v.date_heure_arrivee
-    FROM Vol v
-    JOIN Aeroport a1 ON v.ID_aeroport_depart = a1.ID_aeroport
-    JOIN Aeroport a2 ON v.ID_aeroport_arrivee = a2.ID_aeroport
-    JOIN accessible_cities ac ON ac.ID_aeroport_arrivee = a1.ID_aeroport
-    WHERE v.date_heure_depart > ac.date_heure_arrivee
+WITH accessible_cities (ID_aeroport_depart, ID_aeroport_arrivee, ville, date_heure_depart, date_heure_arrivee, correspondances) AS (
+-- Cas de base: vols directs depuis Paris
+SELECT v.ID_aeroport_depart, v.ID_aeroport_arrivee, a2.ville, v.date_heure_depart, v.date_heure_arrivee, 0
+FROM Vol v
+JOIN Aeroport a1 ON v.ID_aeroport_depart = a1.ID_aeroport
+JOIN Aeroport a2 ON v.ID_aeroport_arrivee = a2.ID_aeroport
+WHERE a1.ville = 'Paris'
+UNION ALL
+-- Cas récursif: correspondances
+SELECT v.ID_aeroport_depart, v.ID_aeroport_arrivee, a2.ville, ac.date_heure_depart, v.date_heure_arrivee, ac.correspondances + 1
+FROM Vol v
+JOIN Aeroport a1 ON v.ID_aeroport_depart = a1.ID_aeroport
+JOIN Aeroport a2 ON v.ID_aeroport_arrivee = a2.ID_aeroport
+JOIN accessible_cities ac ON v.ID_aeroport_depart = ac.ID_aeroport_arrivee
+WHERE v.date_heure_depart > ac.date_heure_arrivee AND v.date_heure_depart <= ac.date_heure_arrivee + INTERVAL '2' DAY
 )
 
-SELECT DISTINCT ville
-FROM accessible_cities;
+SELECT DISTINCT *
+FROM accessible_cities
+WHERE ville != 'Paris';
