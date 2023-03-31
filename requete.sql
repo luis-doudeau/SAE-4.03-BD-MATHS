@@ -58,3 +58,23 @@ WHERE v.date_heure_depart > ac.date_heure_arrivee AND v.date_heure_depart <= ac.
 SELECT DISTINCT *
 FROM accessible_cities
 WHERE ville != 'Paris';
+
+
+WITH 'Paris' AS startingCity, 2 AS maxDays
+CALL {
+  WITH startingCity, maxDays
+  MATCH (a1:Aeroport {ville: startingCity})-[:VOL]->(a2:Aeroport)
+  WITH a1, a2, [(a1)-[v:VOL]->(a2) | v] AS vols
+  WHERE NOT a2.ville = startingCity
+  RETURN a1, a2, vols, 0 AS correspondances
+  UNION ALL
+  WITH startingCity, maxDays
+  MATCH path = (a1:Aeroport {ville: startingCity})-[:VOL*..]->(a2:Aeroport)
+  WHERE NOT a2.ville = startingCity
+  WITH a1, a2, [(a1)-[v:VOL*..]->(a2) | v] AS vols, size(nodes(path)) - 2 AS correspondances
+  WHERE reduce(acc = datetime(vols[0].date_heure_depart), r IN vols | CASE WHEN r.date_heure_depart > acc.date_heure_arrivee AND r.date_heure_depart <= datetime(acc.date_heure_arrivee).plusDays(maxDays) THEN r ELSE acc END) = vols[-1]
+  RETURN a1, a2, vols, correspondances
+}
+WITH DISTINCT a2.ville AS ville, a2.ID_aeroport AS ID_aeroport_arrivee, a1.ID_aeroport AS ID_aeroport_depart, vols[0].date_heure_depart AS date_heure_depart, vols[-1].date_heure_arrivee AS date_heure_arrivee, correspondances
+RETURN ville, ID_aeroport_depart, ID_aeroport_arrivee, date_heure_depart, date_heure_arrivee, correspondances;
+
