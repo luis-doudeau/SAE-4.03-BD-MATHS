@@ -34,7 +34,7 @@ CREATE (jfk:Aeroport {nom: "JFK", terminal: "4", ville:"New York"})
 CREATE (cdg:Aeroport {nom: "Charles de Gaulle", terminal: "2E", ville:"Paris"})
 CREATE (narita:Aeroport {nom: "Narita", terminal: "1", ville:"Tokyo"})
 CREATE (honolulu:Aeroport {nom: "Daniel K. Inouye", terminal: "B", ville:"Honolulu"})
-CREATE (domodedovo:Aeroport {nom: "Domodedovo", terminal: "A", ville:"Moscou"})
+CREATE (domodedovo:Aeroport {nom: "Domodedovo", terminal: "A", ville:"Moscou"}) 
 
 CREATE (:Vol {numVol: "AF123", dateHeureDepart: "2023-04-01T01:30:00Z", dateHeureArrivee: "2023-04-01T02:45:00Z"})-[:DEPART_DE]->(cdg)-[:ARRIVEE_A]->(jfk)
 
@@ -48,8 +48,3 @@ CREATE (:Vol {numVol: "SU123", dateHeureDepart: "2023-07-01T09:30:00Z", dateHeur
 
 
 CREATE (:Vol {numVol: "HA456", dateHeureDepart: "2023-08-01T08:00:00Z", dateHeureArrivee: "2023-08-01T20:00:00Z"})-[:DEPART_DE]->(honolulu)-[:ARRIVEE_A]->(jfk)
-
-
-MATCH (start:Aeroport {ville: "Paris"})-[:DEPART_DE|ARRIVEE_A*]->(destination:Aeroport)<-[:DEPART_DE|ARRIVEE_A*]-(vol:Vol) 
-WHERE start.ville = "Paris" WITH destination.ville AS Ville, min(vol.dateHeureArrivee) 
-AS PremierDepart RETURN Ville ORDER BY Ville
