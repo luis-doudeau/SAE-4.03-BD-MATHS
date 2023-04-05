@@ -4,6 +4,3 @@ Le but de cette SAE est de vous fournir une vision générale des différents mo
 
 1. Faire preuve d'initiative en recherchant des informations et en consultant la documentation technique
 2. Appliquer les connaissances acquises dans la matière principale (la ressource R4.03), ainsi que dans d'autres domaines de votre formation, tels que les mathématiques et l'anglais. La tâche centrale de cette SAE consiste à implémenter des requêtes dans différents modèles de données et les langages de requêtes associés.
-
-
-
